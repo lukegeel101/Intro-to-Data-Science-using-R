@@ -1,0 +1,132 @@
+---
+title: "Flights & Weather datasets (filter & ggplot)"
+author: "Luke Geel"
+date: "9/23/2020"
+output:
+  pdf_document: default
+  html_document: default
+---
+"Question 1"
+```{r}
+library(tidyverse)
+library(nycflights13)
+```
+
+"a"
+```{r}
+a <- dim(flights)
+a
+b <- dim(weather)
+b
+```
+Flight (Observations , Variables)
+(336776     19)
+"Weather (Observations , Variables)
+(26115    15)
+"b"
+```{r}
+?flights
+```
+"Talinum: Plane tail number"
+"Flight: Flight number"
+"Carrier: Two letter carrier abbreviation"
+"dep_delay: Departure delay"
+"arr_delay: Arrival delay"
+"c"
+```{r}
+?weather
+```
+"visib: Visibility in miles"
+"time_hour: Date and hour of the recording as a POSIXct date"
+"temp: Termperature in F"
+"Question 2"
+```{r}
+alaska_flights <- flights %>% filter(carrier == "AS") %>% filter(!is.na(arr_delay))
+```
+"A"
+```{r}
+ggplot(alaska_flights, aes(x = dep_delay, y = arr_delay))+
+  geom_point()
+```
+"Based on tbis scatterplot I noticed that as arr_delay increases, so does dep_delay"
+```{r}
+ggplot(alaska_flights, aes(x = dep_delay, y = arr_delay))+
+  geom_point(alpha=0.15)
+```
+"B"
+"There is a cluster around (0,0) which is equivalent to no departure delay and no arrival delay. To fix this over cluster I will change the transparency of all points to make it easier to see overplotted clusters."
+"Question 3"
+```{r}
+early_january_weather <- weather %>% filter(origin == "EWR" & month == 1)
+```
+"a"
+```{r}
+ggplot(data = early_january_weather) +
+  geom_line(mapping = aes(x = time_hour, y = temp))
+```
+"From this plot I can see that that from Dec 31 to Jan 31 the temperature stayed somewhat consistent except for the week of Jan 21-28 when the temperature dropped by around 15 degrees."
+
+"b"
+```{r}
+ggplot(data = early_january_weather) +
+  geom_line(mapping = aes(x = time_hour, y = dewp))
+ggplot(data = early_january_weather) +
+  geom_line(mapping = aes(x = time_hour, y = humid))
+ggplot(data = early_january_weather) +
+  geom_line(mapping = aes(x = time_hour, y = precip))
+ggplot(data = early_january_weather) +
+  geom_line(mapping = aes(x = time_hour, y = pressure))
+```
+"Question 4"
+```{r}
+weather <- weather %>% filter(!is.na(temp))
+```
+"A"
+```{r}
+ggplot(weather)+
+  geom_histogram(mapping = aes(x=temp),color="white")
+```
+"This histogram shows that the temperature is normally distributed with an average around 60 degrees."
+"b"
+```{r}
+ggplot(weather)+
+  geom_histogram(mapping = aes(x=temp),color="white", bins=40)
+ggplot(weather)+
+  geom_histogram(mapping = aes(x=temp),color="white", binwidth=10)
+```
+"c"
+```{r}
+ggplot(weather)+
+  geom_histogram(mapping = aes(x=temp),color="white", binwidth=5)+
+    facet_wrap(~ month, nrow=3)
+```
+"Using the histograms for each month, it's easy to compare distributions. For all months, the temperature is normally distributed, the only real difference is the mean. For months 1,2, and 12, the mean was about 30 degrees. For 3,4, and 5 it was closer to 50. For months 6-10, the mean was closer to 70."
+"Question 5"
+"A"
+```{r}
+ggplot(weather)+
+  geom_boxplot(mapping = aes(y=temp))
+summary(weather)
+```
+"Based on this boxplot, the mean temperature is about 55 degrees with a Q1 of 40 and a Q3 of 70. The max is 100 and the min is 10."
+"b"
+```{r}
+ggplot(data = weather, mapping = aes(x= month,y = temp))+
+  geom_boxplot()+
+  facet_wrap(~ month)
+```
+"With the initial code I didn't get what I was expecting, but I used facet_wrap to split the boxplots up by month."
+"Month with higest temperature variability: May"
+"Month with lowest temperature variability: March"
+"Question 6"
+"A"
+```{r}
+ggplot(flights)+
+  geom_bar(mapping = aes(x=carrier))
+```
+"The 2nd highest airline for departed flights from NYC in 2013: Jetblue"
+```{r}
+ggplot(flights)+
+  geom_bar(mapping = aes(x=origin, fill=carrier))
+```
+"Highest airlines for departed flights from the three airports: EWR: United Airways, JFK: Jetblue, LGA: Delta"
